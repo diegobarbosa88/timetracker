@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/admin/employees/edit-employee",
+      "dest": "/admin/employees/edit-employee"
+    },
+    {
+      "src": "/admin/employees/view-employee",
+      "dest": "/admin/employees/view-employee"
+    },
+    {
+      "src": "/admin/employees/add-employee",
+      "dest": "/admin/employees/add-employee"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
