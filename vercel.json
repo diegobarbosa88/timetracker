@@ -1,20 +1,30 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/admin/employees/edit-employee",
-      "destination": "/admin/employees/edit-employee"
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "installCommand": "npm install --legacy-peer-deps"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/admin/employees/edit-employee",
+      "dest": "/admin/employees/edit-employee"
     },
     {
-      "source": "/admin/employees/view-employee",
-      "destination": "/admin/employees/view-employee"
+      "src": "/admin/employees/view-employee",
+      "dest": "/admin/employees/view-employee"
     },
     {
-      "source": "/admin/employees/add-employee",
-      "destination": "/admin/employees/add-employee"
+      "src": "/admin/employees/add-employee",
+      "dest": "/admin/employees/add-employee"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
