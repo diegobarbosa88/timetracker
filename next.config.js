@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Configuración para despliegue dinámico en lugar de exportación estática
+  // output: 'export',
   images: {
     unoptimized: true,
   },

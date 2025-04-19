@@ -1,27 +1,20 @@
 {
   "version": 2,
-  "builds": [
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/admin/employees/edit-employee",
-      "dest": "/admin/employees/edit-employee"
+      "source": "/admin/employees/edit-employee",
+      "destination": "/admin/employees/edit-employee"
     },
     {
-      "src": "/admin/employees/view-employee",
-      "dest": "/admin/employees/view-employee"
+      "source": "/admin/employees/view-employee",
+      "destination": "/admin/employees/view-employee"
     },
     {
-      "src": "/admin/employees/add-employee",
-      "dest": "/admin/employees/add-employee"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/admin/employees/add-employee",
+      "destination": "/admin/employees/add-employee"
     }
   ]
 }
