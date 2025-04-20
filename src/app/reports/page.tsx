@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '../../lib/auth';
 
 export default function ReportsPage() {
   const { user, isAuthenticated, loading } = useAuth();
