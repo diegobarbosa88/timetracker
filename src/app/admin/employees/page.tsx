@@ -1,367 +1,424 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../lib/auth';
 
-export default function AdminEmployeesPage() {
+export default function ViewEmployeePage() {
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
-  const [employees, setEmployees] = useState([
+  const [employee, setEmployee] = useState(null);
+  const [timeRecords, setTimeRecords] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Datos de ejemplo para los empleados
+  const sampleEmployees = [
     {
       id: 'EMP001',
       name: 'Carlos Rodríguez',
       email: 'carlos.rodriguez@magneticplace.com',
-      department: 'Operaciones',
-      status: 'Registrado (08:30)',
-      statusClass: 'bg-green-100 text-green-800',
       phone: '+34 612 345 678',
-      position: 'Técnico Senior',
-      hireDate: '2023-05-15',
+      department: 'Desarrollo',
+      position: 'Desarrollador Senior',
+      status: 'Activo',
+      joinDate: '2022-03-15',
+      location: 'Madrid',
+      tags: ['Proyecto A', 'Frontend'],
       address: 'Calle Principal 123, Madrid',
-      emergencyContact: 'María Rodríguez - +34 698 765 432',
-      notes: 'Especialista en instalaciones industriales. Certificado en seguridad industrial.'
+      emergencyContact: 'Ana Rodríguez - +34 612 345 679',
+      birthDate: '1985-06-15',
+      documentId: '12345678A',
+      bankAccount: 'ES12 1234 5678 9012 3456 7890',
+      salary: 45000,
+      contractType: 'Indefinido',
+      workSchedule: 'Lunes a Viernes, 9:00 - 18:00',
+      vacationDays: 22,
+      sickDays: 15,
+      manager: 'Javier López',
+      skills: ['JavaScript', 'React', 'Node.js', 'TypeScript', 'HTML/CSS'],
+      education: [
+        {
+          degree: 'Ingeniería Informática',
+          institution: 'Universidad Politécnica de Madrid',
+          year: '2010'
+        }
+      ],
+      certifications: [
+        {
+          name: 'React Developer Certification',
+          institution: 'React Training',
+          year: '2020'
+        }
+      ]
     },
     {
       id: 'EMP002',
       name: 'Ana Martínez',
       email: 'ana.martinez@magneticplace.com',
-      department: 'Administración',
-      status: 'Registrada (08:15)',
-      statusClass: 'bg-green-100 text-green-800',
       phone: '+34 623 456 789',
-      position: 'Gerente Administrativa',
-      hireDate: '2022-11-10',
-      address: 'Avenida Central 45, Barcelona',
-      emergencyContact: 'Juan Martínez - +34 687 654 321',
-      notes: 'Responsable de contabilidad y recursos humanos. Máster en administración de empresas.'
+      department: 'Diseño',
+      position: 'Diseñadora UX/UI',
+      status: 'Activo',
+      joinDate: '2022-05-20',
+      location: 'Barcelona',
+      tags: ['Proyecto B', 'Diseño'],
+      address: 'Avenida Diagonal 456, Barcelona',
+      emergencyContact: 'Pedro Martínez - +34 623 456 780',
+      birthDate: '1990-08-25',
+      documentId: '87654321B',
+      bankAccount: 'ES98 8765 4321 0987 6543 2109',
+      salary: 42000,
+      contractType: 'Indefinido',
+      workSchedule: 'Lunes a Viernes, 9:30 - 18:30',
+      vacationDays: 22,
+      sickDays: 15,
+      manager: 'Carmen Ruiz',
+      skills: ['Figma', 'Adobe XD', 'Sketch', 'Illustrator', 'Photoshop'],
+      education: [
+        {
+          degree: 'Diseño Gráfico',
+          institution: 'Escuela de Diseño de Barcelona',
+          year: '2015'
+        }
+      ],
+      certifications: [
+        {
+          name: 'UX/UI Design Certification',
+          institution: 'Interaction Design Foundation',
+          year: '2021'
+        }
+      ]
+    }
+  ];
+
+  // Datos de ejemplo para los registros de tiempo
+  const sampleTimeRecords = [
+    {
+      id: 'TR001',
+      employeeId: 'EMP001',
+      date: '2024-04-20',
+      checkIn: '08:30',
+      checkOut: '17:45',
+      totalHours: 8.25,
+      status: 'Completado',
+      location: 'Oficina Madrid',
+      notes: ''
     },
     {
-      id: 'EMP003',
-      name: 'Miguel Sánchez',
-      email: 'miguel.sanchez@magneticplace.com',
-      department: 'Ventas',
-      status: 'No registrado',
-      statusClass: 'bg-red-100 text-red-800',
-      phone: '+34 634 567 890',
-      position: 'Representante de Ventas',
-      hireDate: '2024-01-20',
-      address: 'Plaza Mayor 8, Valencia',
-      emergencyContact: 'Laura Sánchez - +34 676 543 210',
-      notes: 'Especializado en desarrollo de nuevos clientes. Experiencia previa en el sector industrial.'
+      id: 'TR002',
+      employeeId: 'EMP001',
+      date: '2024-04-19',
+      checkIn: '08:15',
+      checkOut: '17:30',
+      totalHours: 8.25,
+      status: 'Completado',
+      location: 'Oficina Madrid',
+      notes: ''
+    },
+    {
+      id: 'TR003',
+      employeeId: 'EMP001',
+      date: '2024-04-18',
+      checkIn: '08:45',
+      checkOut: '18:00',
+      totalHours: 8.25,
+      status: 'Completado',
+      location: 'Remoto',
+      notes: 'Trabajo desde casa'
+    },
+    {
+      id: 'TR004',
+      employeeId: 'EMP002',
+      date: '2024-04-20',
+      checkIn: '09:00',
+      checkOut: '18:00',
+      totalHours: 8,
+      status: 'Completado',
+      location: 'Oficina Barcelona',
+      notes: ''
     }
-  ]);
-  const [filteredEmployees, setFilteredEmployees] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [department, setDepartment] = useState('all');
-  const [status, setStatus] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const employeesPerPage = 3;
+  ];
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/auth/login');
-    } else if (!loading && isAuthenticated && user?.role !== 'admin') {
-      // Redirigir a usuarios no administradores
-      router.push('/dashboard');
     }
-  }, [isAuthenticated, loading, router, user]);
+  }, [isAuthenticated, loading, router]);
 
-  // Inicializar empleados filtrados
   useEffect(() => {
-    setFilteredEmployees(employees);
-  }, [employees]);
-
-  // Función para aplicar filtros
-  const applyFilters = () => {
-    let filtered = [...employees];
+    // Obtener el ID del empleado de la URL
+    const searchParams = new URLSearchParams(window.location.search);
+    const employeeId = searchParams.get('id');
     
-    // Filtrar por departamento
-    if (department !== 'all') {
-      filtered = filtered.filter(emp => 
-        emp.department.toLowerCase() === department.toLowerCase()
-      );
+    if (employeeId) {
+      // Simulación de carga de datos
+      const foundEmployee = sampleEmployees.find(emp => emp.id === employeeId);
+      const employeeTimeRecords = sampleTimeRecords.filter(record => record.employeeId === employeeId);
+      
+      setEmployee(foundEmployee || null);
+      setTimeRecords(employeeTimeRecords || []);
+      setIsLoading(false);
+    } else {
+      router.push('/admin/employees');
     }
-    
-    // Filtrar por estado
-    if (status === 'active') {
-      filtered = filtered.filter(emp => 
-        emp.status.toLowerCase().includes('registrad')
-      );
-    } else if (status === 'inactive') {
-      filtered = filtered.filter(emp => 
-        emp.status.toLowerCase().includes('no registrado')
-      );
-    }
-    
-    // Filtrar por término de búsqueda
-    if (searchTerm) {
-      filtered = filtered.filter(emp => 
-        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.id.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    setFilteredEmployees(filtered);
-    setCurrentPage(1); // Resetear a la primera página
-  };
+  }, [router]);
 
-  // Función para exportar lista
-  const handleExportList = () => {
-    // Ejemplo de descarga de CSV
-    const headers = ['ID', 'Nombre', 'Email', 'Departamento', 'Estado'];
-    const csvContent = [
-      headers.join(','),
-      ...filteredEmployees.map(emp => 
-        [emp.id, emp.name, emp.email, emp.department, emp.status].join(',')
-      )
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'empleados.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Función para eliminar empleado
-  const handleDeleteEmployee = (employeeId) => {
-    if (confirm('¿Está seguro que desea eliminar este empleado? Esta acción no se puede deshacer.')) {
-      // Filtrar el empleado eliminado
-      const updatedEmployees = employees.filter(emp => emp.id !== employeeId);
-      setEmployees(updatedEmployees);
-      setFilteredEmployees(updatedEmployees);
-      alert('Empleado eliminado correctamente');
+  const handleEditEmployee = () => {
+    if (employee) {
+      router.push(`/admin/employees/edit-employee?id=${employee.id}`);
     }
   };
 
-  // Paginación
-  const indexOfLastEmployee = currentPage * employeesPerPage;
-  const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
-  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+  const handleBackToList = () => {
+    router.push('/admin/employees');
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+  const formatDate = (dateString) => {
+    // Corregido para usar valores válidos para DateTimeFormatOptions
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('es-ES', options);
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || user?.role !== 'admin') {
-    return null; // Redirigiendo
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Gestión de Empleados</h1>
-        
-        {/* Panel de control */}
-        <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">Empleados</h2>
-              <p className="text-gray-600">Total: {filteredEmployees.length} empleados</p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Enlace HTML nativo para Añadir Empleado */}
-              <a 
-                href="/admin/employees/add-employee"
-                className="btn-primary flex items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Añadir Empleado
-              </a>
-              <button 
-                className="btn-secondary flex items-center justify-center"
-                onClick={handleExportList}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                Exportar Lista
-              </button>
-            </div>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Detalles del Empleado</h1>
+          <div className="flex space-x-4">
+            <button
+              onClick={handleBackToList}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Volver a la Lista
+            </button>
+            <button
+              onClick={handleEditEmployee}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Editar Empleado
+            </button>
           </div>
         </div>
-        
-        {/* Filtros */}
-        <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Filtros</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
-                Departamento
-              </label>
-              <select
-                id="department"
-                name="department"
-                className="form-input"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-              >
-                <option value="all">Todos</option>
-                <option value="operaciones">Operaciones</option>
-                <option value="administración">Administración</option>
-                <option value="ventas">Ventas</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Estado
-              </label>
-              <select
-                id="status"
-                name="status"
-                className="form-input"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="all">Todos</option>
-                <option value="active">Activo</option>
-                <option value="inactive">Inactivo</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                Buscar
-              </label>
-              <input
-                type="text"
-                id="search"
-                name="search"
-                className="form-input"
-                placeholder="Nombre, email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex items-end">
-              <button 
-                className="btn-primary w-full"
-                onClick={applyFilters}
-              >
-                Aplicar Filtros
-              </button>
+
+        {isLoading ? (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Cargando...</p>
             </div>
           </div>
-        </div>
-        
-        {/* Lista de empleados */}
-        <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Lista de Empleados</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departamento</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Actual</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentEmployees.map((employee) => (
-                  <tr key={employee.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{employee.name}</div>
-                          <div className="text-sm text-gray-500">ID: {employee.id}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {employee.department}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${employee.statusClass}`}>
+        ) : employee ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Información Personal */}
+            <div className="lg:col-span-1">
+              <div className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
+                <div className="bg-blue-500 px-6 py-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 h-24 w-24 bg-white rounded-full flex items-center justify-center">
+                      <span className="text-blue-500 text-4xl font-bold">{employee.name.charAt(0)}</span>
+                    </div>
+                    <div className="ml-4 text-white">
+                      <h2 className="text-xl font-bold">{employee.name}</h2>
+                      <p className="text-blue-100">{employee.position}</p>
+                      <span className={`mt-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        employee.status === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                         {employee.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        {/* Enlaces HTML nativos para Editar y Ver con ID del empleado */}
-                        <a 
-                          href={`/admin/employees/edit-employee?id=${employee.id}`}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          Editar
-                        </a>
-                        <a 
-                          href={`/admin/employees/view-employee?id=${employee.id}`}
-                          className="text-gray-600 hover:text-gray-900"
-                        >
-                          Ver
-                        </a>
-                        <button
-                          onClick={() => handleDeleteEmployee(employee.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Mostrando <span className="font-medium">{indexOfFirstEmployee + 1}</span> a <span className="font-medium">{Math.min(indexOfLastEmployee, filteredEmployees.length)}</span> de <span className="font-medium">{filteredEmployees.length}</span> resultados
+                    </div>
+                  </div>
+                </div>
+                <div className="px-6 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Información de Contacto</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="text-gray-900">{employee.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Teléfono</p>
+                      <p className="text-gray-900">{employee.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Dirección</p>
+                      <p className="text-gray-900">{employee.address}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Contacto de Emergencia</p>
+                      <p className="text-gray-900">{employee.emergencyContact}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                <div className="px-6 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Etiquetas</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {employee.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex space-x-2">
-              <button 
-                className={`btn-secondary py-1 px-3 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={handlePreviousPage}
-                disabled={currentPage === 1}
-              >
-                Anterior
-              </button>
-              <button 
-                className={`btn-secondary py-1 px-3 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Siguiente
-              </button>
+
+            {/* Información Laboral y Estadísticas */}
+            <div className="lg:col-span-2">
+              <div className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
+                <div className="px-6 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Información Laboral</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Departamento</p>
+                      <p className="text-gray-900">{employee.department}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Posición</p>
+                      <p className="text-gray-900">{employee.position}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Fecha de Incorporación</p>
+                      <p className="text-gray-900">{formatDate(employee.joinDate)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Ubicación</p>
+                      <p className="text-gray-900">{employee.location}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Tipo de Contrato</p>
+                      <p className="text-gray-900">{employee.contractType}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Horario de Trabajo</p>
+                      <p className="text-gray-900">{employee.workSchedule}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Salario Anual</p>
+                      <p className="text-gray-900">{employee.salary.toLocaleString('es-ES')} €</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Manager</p>
+                      <p className="text-gray-900">{employee.manager}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
+                <div className="px-6 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Estadísticas</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <p className="text-sm text-blue-800 font-medium">Días de Vacaciones</p>
+                      <p className="text-2xl font-bold text-blue-600">{employee.vacationDays}</p>
+                      <p className="text-xs text-blue-500">Disponibles</p>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <p className="text-sm text-green-800 font-medium">Días de Enfermedad</p>
+                      <p className="text-2xl font-bold text-green-600">{employee.sickDays}</p>
+                      <p className="text-xs text-green-500">Disponibles</p>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <p className="text-sm text-purple-800 font-medium">Horas Trabajadas</p>
+                      <p className="text-2xl font-bold text-purple-600">
+                        {timeRecords.reduce((total, record) => total + record.totalHours, 0).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-purple-500">Este mes</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
+                <div className="px-6 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Habilidades</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {employee.skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                <div className="px-6 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Historial de Registros</h3>
+                  {timeRecords.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Fecha
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Entrada
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Salida
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Total
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Ubicación
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Estado
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {timeRecords.map((record) => (
+                            <tr key={record.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatDate(record.date)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {record.checkIn}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {record.checkOut}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {record.totalHours.toFixed(2)} h
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {record.location}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                  {record.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No hay registros disponibles.</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <p className="text-gray-500">No se encontró información del empleado.</p>
+          </div>
+        )}
       </div>
     </div>
   );
