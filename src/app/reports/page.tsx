@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/auth';
+import { sampleTimeRecords, getUniqueClients } from '../../lib/sample-data';
+import { TimeRecord } from '../../lib/time-tracking-models';
 
 export default function ReportsPage() {
   const { user, isAuthenticated, loading } = useAuth();
@@ -17,65 +19,6 @@ export default function ReportsPage() {
   const [availableDays, setAvailableDays] = useState([]);
   const [uniqueClients, setUniqueClients] = useState(['Cliente A', 'Cliente B', 'Cliente C']);
   const [showDaySelector, setShowDaySelector] = useState(false);
-
-  // Datos de ejemplo para los registros de tiempo
-  const sampleTimeRecords = [
-    {
-      id: 'TR001',
-      userId: 'EMP001',
-      date: '2024-04-20',
-      startTime: '08:30',
-      endTime: '17:45',
-      totalWorkTime: 555, // en minutos
-      clientTag: 'Cliente A',
-      usedEntryTolerance: false,
-      usedExitTolerance: false
-    },
-    {
-      id: 'TR002',
-      userId: 'EMP001',
-      date: '2024-04-19',
-      startTime: '08:15',
-      endTime: '17:30',
-      totalWorkTime: 555,
-      clientTag: 'Cliente B',
-      usedEntryTolerance: false,
-      usedExitTolerance: false
-    },
-    {
-      id: 'TR003',
-      userId: 'EMP001',
-      date: '2024-04-18',
-      startTime: '08:45',
-      endTime: '18:00',
-      totalWorkTime: 555,
-      clientTag: 'Cliente A',
-      usedEntryTolerance: true,
-      usedExitTolerance: false
-    },
-    {
-      id: 'TR004',
-      userId: 'EMP002',
-      date: '2024-04-20',
-      startTime: '08:30',
-      endTime: '17:30',
-      totalWorkTime: 540,
-      clientTag: 'Cliente C',
-      usedEntryTolerance: false,
-      usedExitTolerance: false
-    },
-    {
-      id: 'TR005',
-      userId: 'EMP002',
-      date: '2024-04-19',
-      startTime: '08:30',
-      endTime: '17:30',
-      totalWorkTime: 540,
-      clientTag: 'Cliente C',
-      usedEntryTolerance: false,
-      usedExitTolerance: false
-    }
-  ];
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
